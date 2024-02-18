@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import './fonts.css';
+@import '@components/Spinner/index.css';
+
+:root {
+	--gunmetal-rgb: 92, 90, 86;
+	--accent-rgb: 137 203 139;
+	--foreground-rgb: var(--gunmetal-rgb);
+	--background-rgb: 246 255 244;
+	--input-background-rgb: 222 240 227;
+	--button-background-rgb: var(--gunmetal-rgb);
+	--button-foreground-rgb: 255 255 255;
+	--card-background-rgb: 235 241 234;
+	accent-color: rgb(var(--accent-rgb));
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--foreground-rgb: 255, 255, 255;
+		--background-rgb: 43 44 48;
+		--input-background-rgb: 72 73 74;
+		--button-background-rgb: 255 255 255;
+		--button-foreground-rgb: var(--gunmetal-rgb);
+		--card-background-rgb: 57 58 64;
+	}
+}
+
+body {
+	color: rgb(var(--foreground-rgb));
+	background: rgb(var(--background-rgb));
+	font-family: 'Eudoxus Sans', 'Open Sans', sans-serif;
+}
+
+.underline-squiggle {
+	text-decoration: rgb(var(--accent-rgb)) wavy underline;
+	text-underline-offset: 5px;
+	text-decoration-thickness: 1.7px;
+}
+
+input[type='text'],
+input[type='password'],
+input[type='email'],
+input[type='number'],
+input[type='search'] {
+	background: rgb(var(--input-background-rgb));
+	color: rgb(var(--foreground-rgb));
+	border: none;
+}
+
+@layer utilities {
+	.text-balance {
+		text-wrap: balance;
+	}
+}
+
+.habit-list {
+	input[type='checkbox'] {
+		height: 17px;
+		width: 17px;
+	}
+	input[type='checkbox']:checked ~ label,
+	label:hover {
+		text-decoration: line-through;
+	}
+}
