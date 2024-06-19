@@ -1,10 +1,19 @@
 import { ApolloClient, ApolloLink, InMemoryCache } from '@apollo/client';
 import { onError } from '@apollo/link-error';
 import { getDataFromTree } from '@apollo/client/react/ssr';
-import { createUploadLink } from 'apollo-upload-client';
+import { HttpLink } from '@apollo/client';
 import withApollo from 'next-with-apollo';
 
 function createClient({ headers, initialState }: any) {
+	const link = new HttpLink({
+		uri: process.env.NEXT_PUBLIC_BACKEND_ENDPOINT,
+		fetchOptions: {
+			credentials: 'include',
+		},
+		// pass the headers along from this request. This enables SSR with logged in state
+		headers,
+	});
+
 	return new ApolloClient({
 		link: ApolloLink.from([
 			onError(({ graphQLErrors, networkError }) => {
@@ -17,15 +26,7 @@ function createClient({ headers, initialState }: any) {
 				if (networkError)
 					console.log(`[Network error]: ${networkError}. Backend is unreachable. Is it running?`);
 			}),
-			// this uses apollo-link-http under the hood, so all the options here come from that package
-			createUploadLink({
-				uri: process.env.NEXT_PUBLIC_BACKEND_ENDPOINT,
-				fetchOptions: {
-					credentials: 'include',
-				},
-				// pass the headers along from this request. This enables SSR with logged in state
-				headers,
-			}),
+			link,
 		]),
 		cache: new InMemoryCache({
 			typePolicies: {
