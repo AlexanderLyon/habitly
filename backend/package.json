@@ -5,7 +5,8 @@
   "author": "Alex Lyon",
   "license": "ISC",
   "scripts": {
-    "dev": "keystone-next",
+    "build": "keystone-next build",
+    "dev": "keystone-next start",
     "seed-data": "keystone-next --seed-data"
   },
   "babel": {
