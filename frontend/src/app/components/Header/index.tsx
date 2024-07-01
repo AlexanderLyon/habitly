@@ -1,30 +1,19 @@
 'use client';
+import { useContext } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { gql, useMutation } from '@apollo/client';
-import { useUser, CURRENT_USER_QUERY } from '@hooks/useUser';
-
-const SIGN_OUT_MUTATION = gql`
-	mutation {
-		endSession
-	}
-`;
+import { UserContext } from '@context/SessionContext';
 
 export const Header: React.FC = () => {
 	const router = useRouter();
-	const { user } = useUser();
-
-	const [signout, { data, loading }] = useMutation(SIGN_OUT_MUTATION, {
-		refetchQueries: [{ query: CURRENT_USER_QUERY }],
-	});
+	const { user, refetch } = useContext(UserContext);
 
 	const handleSignout = async (e: React.MouseEvent) => {
 		e.preventDefault();
-		const res = await signout();
-		if (res.data.endSession) {
-			// Redirect to homepage on successful sign out
-			router.push('/');
-		}
+		localStorage.removeItem('jwtToken');
+		localStorage.removeItem('userId');
+		await refetch();
+		router.push('/');
 	};
 
 	return (

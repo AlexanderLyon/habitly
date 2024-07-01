@@ -1,8 +1,9 @@
 'use client';
+import { useContext } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { CURRENT_USER_QUERY } from '@hooks/useUser';
+import { UserContext } from '@context/SessionContext';
 import useForm from '@hooks/useForm';
 import { Button } from '@components/Button';
 import { Input } from '@components/Input';
@@ -10,16 +11,12 @@ import { Alert } from '@components/Alert';
 
 const SIGNIN_MUTATION = gql`
 	mutation SIGNIN_MUTATION($email: String!, $password: String!) {
-		authenticateUserWithPassword(email: $email, password: $password) {
-			... on UserAuthenticationWithPasswordSuccess {
-				item {
-					id
-					email
-					name
-				}
+		login(email: $email, password: $password) {
+			user {
+				id
 			}
-			... on UserAuthenticationWithPasswordFailure {
-				code
+			jwt
+			errors {
 				message
 			}
 		}
@@ -27,38 +24,35 @@ const SIGNIN_MUTATION = gql`
 `;
 
 const LoginPage = () => {
+	const { refetch } = useContext(UserContext);
 	const router = useRouter();
 	const { inputs, handleChange, resetForm } = useForm({
 		email: '',
 		password: '',
 	});
 
-	const [signin, { data, loading }] = useMutation(SIGNIN_MUTATION, {
+	const [signin, { data, loading, error }] = useMutation(SIGNIN_MUTATION, {
 		variables: inputs,
-		refetchQueries: [{ query: CURRENT_USER_QUERY }],
 	});
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 		const res = await signin();
-		if (
-			res.data.authenticateUserWithPassword.__typename === 'UserAuthenticationWithPasswordSuccess'
-		) {
+
+		if (res.data.login.user?.id) {
 			// Redirect to dashboard on successful sign in
+			resetForm();
+			localStorage.setItem('userId', res.data.login.user.id);
+			localStorage.setItem('jwtToken', res.data.login.jwt);
+			refetch();
 			router.push('/');
 		}
-		resetForm();
 	};
-
-	const error =
-		data?.authenticateUserWithPassword.__typename === 'UserAuthenticationWithPasswordFailure'
-			? data?.authenticateUserWithPassword
-			: undefined;
 
 	return (
 		<div className="px-6 py-12 md:p-24">
 			<h2 className="text-center">Sign In</h2>
-			{error && <Alert>{error.message}</Alert>}
+			{error && <Alert className="mb-6">{error.message}</Alert>}
 			<form
 				method="POST"
 				onSubmit={handleSubmit}

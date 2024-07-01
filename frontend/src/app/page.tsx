@@ -1,12 +1,13 @@
 'use client';
+import { useContext } from 'react';
+import { UserContext } from '@context/SessionContext';
 import Link from 'next/link';
-import { useUser } from '@hooks/useUser';
 import { Spinner } from '@components/Spinner';
 import { Quote } from '@components/Quote';
 import UserDashboard from '@components/UserDashboard';
 
 function Home() {
-	const { user, loading } = useUser();
+	const { user, loading } = useContext(UserContext);
 
 	const GuestOnboarding: React.FC = () => (
 		<div className="text-center">

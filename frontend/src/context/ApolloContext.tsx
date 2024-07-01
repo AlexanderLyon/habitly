@@ -1,5 +1,6 @@
 'use client';
-import { ApolloLink, HttpLink } from '@apollo/client';
+import { ApolloLink, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/link-error';
 import {
 	ApolloNextAppProvider,
@@ -8,11 +9,21 @@ import {
 } from '@apollo/experimental-nextjs-app-support';
 
 function makeClient() {
-	const httpLink = new HttpLink({
+	const httpLink = createHttpLink({
 		uri: process.env.NEXT_PUBLIC_BACKEND_ENDPOINT,
 		fetchOptions: {
 			credentials: 'include',
 		},
+	});
+
+	const authLink = setContext((_, { headers }) => {
+		const token = localStorage.getItem('jwtToken');
+		return {
+			headers: {
+				...headers,
+				authorization: token ? `Bearer ${token}` : '',
+			},
+		};
 	});
 
 	return new ApolloClient({
@@ -28,7 +39,7 @@ function makeClient() {
 				if (networkError)
 					console.log(`[Network error]: ${networkError}. Backend is unreachable. Is it running?`);
 			}),
-			httpLink,
+			authLink.concat(httpLink),
 		]),
 	});
 }

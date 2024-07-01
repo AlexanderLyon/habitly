@@ -1,9 +1,10 @@
 'use client';
+import { useContext } from 'react';
 import { gql, useMutation } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import { Button } from '@components/Button';
 import { NewHabitForm } from '@components/NewHabitForm';
-import { useUser, CURRENT_USER_QUERY } from '@hooks/useUser';
+import { UserContext } from '@context/SessionContext';
 
 interface Habit {
 	id: string;
@@ -29,10 +30,8 @@ function UserDashboard() {
 	const [showNewHabitForm, setShowNewHabitForm] = useState(false);
 	const [incompleteHabits, setIncompleteHabits] = useState([]);
 	const [completedHabits, setCompletedHabits] = useState([]);
-	const { user } = useUser();
-	const [updateHabit, { data, error, loading }] = useMutation(UPDATE_HABIT_MUTATION, {
-		refetchQueries: [{ query: CURRENT_USER_QUERY }],
-	});
+	const { user, refetch } = useContext(UserContext);
+	const [updateHabit, { data, error, loading }] = useMutation(UPDATE_HABIT_MUTATION);
 
 	const toggleCompletion = async (id: string) => {
 		await updateHabit({
@@ -40,6 +39,8 @@ function UserDashboard() {
 				id,
 			},
 		}).catch(console.error);
+
+		refetch();
 	};
 
 	const HabitList: React.FC<HabitListProps> = ({ habits }) => (
@@ -68,7 +69,7 @@ function UserDashboard() {
 	);
 
 	useEffect(() => {
-		if (user) {
+		if (user && user.habits) {
 			setIncompleteHabits(user.habits.filter(habit => !habit.doneToday) || []);
 			setCompletedHabits(user.habits.filter(habit => habit.doneToday) || []);
 		}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Header } from '@components/Header';
-import { ApolloWrapper } from '../context/ApolloContext';
+import { ApolloWrapper } from '@context/ApolloContext';
+import { SessionContext } from '@context/SessionContext';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -17,8 +18,10 @@ export default function RootLayout({
 		<html lang="en">
 			<body>
 				<ApolloWrapper>
-					<Header />
-					<main className="min-h-screen pt-12">{children}</main>
+					<SessionContext>
+						<Header />
+						<main className="min-h-screen pt-12">{children}</main>
+					</SessionContext>
 				</ApolloWrapper>
 			</body>
 		</html>

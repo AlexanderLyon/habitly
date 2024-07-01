@@ -8,10 +8,15 @@ import Link from 'next/link';
 
 const SIGNUP_MUTATION = gql`
 	mutation SIGNUP_MUTATION($email: String!, $name: String!, $password: String!) {
-		createUser(data: { email: $email, name: $name, password: $password }) {
-			id
-			email
-			name
+		signup(email: $email, name: $name, password: $password) {
+			user {
+				id
+				email
+				name
+			}
+			errors {
+				message
+			}
 		}
 	}
 `;
@@ -42,8 +47,8 @@ const Register: React.FC = () => {
 				className="flex flex-col justify-center items-center my-8"
 			>
 				{error && <Alert className="mb-6">{error.message}</Alert>}
-				{data?.createUser ? (
-					<p>Signed up with {data.createUser.email} - Please go ahead and sign in!</p>
+				{data?.signup?.user ? (
+					<p>Signed up with {data.signup.user.email} - Please go ahead and sign in!</p>
 				) : (
 					<>
 						<Input
